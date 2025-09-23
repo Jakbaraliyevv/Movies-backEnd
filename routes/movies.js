@@ -45,6 +45,10 @@ const {
   addMovie,
   updateMovie,
   deleteMovie,
+  addView,
+  toggleLike,
+  toggleDislike,
+  toggleSave,
 } = require("../controllers/movieController");
 
 // ✅ CRUD Routes
@@ -54,5 +58,9 @@ router.get("/:id", getMovieById); // Bitta kino
 router.post("/", auth, addMovie); // Kino qo‘shish (faqat login user)
 router.put("/:id", auth, updateMovie); // Kino yangilash
 router.delete("/:id", auth, deleteMovie); // Kino o‘chirish
-
+router.post("/:id/like", auth, toggleLike);
+router.post("/:id/dislike", auth, toggleDislike);
+router.post("/:id/save", auth, toggleSave);
+// 📌 Views
+router.post("/:id/view", auth, addView);
 module.exports = router;

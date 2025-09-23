@@ -274,3 +274,167 @@ exports.deleteMovie = async (req, res) => {
     res.status(500).json({ msg: "Server error" });
   }
 };
+
+// bu yerdan new code
+
+// ✅ Viewsni oshirish
+// exports.addView = async (req, res) => {
+//   try {
+//     const movie = await Movie.findByIdAndUpdate(
+//       req.params.id,
+//       { $inc: { views: 1 } },
+//       { new: true }
+//     );
+//     if (!movie) return res.status(404).json({ msg: "Movie not found" });
+//     res.json({ views: movie.views });
+//   } catch (err) {
+//     res.status(500).json({ msg: "Server error" });
+//   }
+// };
+exports.addView = async (req, res) => {
+  try {
+    const movie = await Movie.findById(req.params.id);
+    if (!movie) return res.status(404).json({ msg: "Movie not found" });
+
+    const userId = req.user.id; 
+    if (!movie.views.includes(userId)) {
+      movie.views.push(userId);
+      await movie.save();
+    }
+
+    res.json({ views: movie.views.length });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Server error" });
+  }
+};
+
+
+// // ✅ Like toggle
+// exports.toggleLike = async (req, res) => {
+//   try {
+//     const userId = req.user.id; // authMiddleware dan
+//     const movie = await Movie.findById(req.params.id);
+//     if (!movie) return res.status(404).json({ msg: "Movie not found" });
+
+//     // Dislike bo‘lsa olib tashlaymiz
+//     movie.dislikes = movie.dislikes.filter((id) => id.toString() !== userId);
+
+//     // Like toggle
+//     if (movie.likes.includes(userId)) {
+//       movie.likes = movie.likes.filter((id) => id.toString() !== userId);
+//     } else {
+//       movie.likes.push(userId);
+//     }
+
+//     await movie.save();
+//     res.json({ likes: movie.likes.length, dislikes: movie.dislikes.length });
+//   } catch (err) {
+//     res.status(500).json({ msg: "Server error" });
+//   }
+// };
+
+// // ✅ Dislike toggle
+// exports.toggleDislike = async (req, res) => {
+//   try {
+//     const userId = req.user.id;
+//     const movie = await Movie.findById(req.params.id);
+//     if (!movie) return res.status(404).json({ msg: "Movie not found" });
+
+//     // Like bo‘lsa olib tashlaymiz
+//     movie.likes = movie.likes.filter((id) => id.toString() !== userId);
+
+//     // Dislike toggle
+//     if (movie.dislikes.includes(userId)) {
+//       movie.dislikes = movie.dislikes.filter((id) => id.toString() !== userId);
+//     } else {
+//       movie.dislikes.push(userId);
+//     }
+
+//     await movie.save();
+//     res.json({ likes: movie.likes.length, dislikes: movie.dislikes.length });
+//   } catch (err) {
+//     res.status(500).json({ msg: "Server error" });
+//   }
+// };
+
+// ✅ Like toggle
+exports.toggleLike = async (req, res) => {
+  try {
+    const movie = await Movie.findById(req.params.id);
+    if (!movie) return res.status(404).json({ msg: "Movie not found" });
+
+    const userId = req.user.id;
+
+    // Agar schema’da likes/dislikes massiv bo‘lsa:
+    if (!movie.likes) movie.likes = [];
+    if (!movie.dislikes) movie.dislikes = [];
+
+    // ❌ Agar avval dislike bosgan bo‘lsa, o‘chirib tashlaymiz
+    movie.dislikes = movie.dislikes.filter((id) => id.toString() !== userId);
+
+    // ✅ Like bosganmi?
+    if (movie.likes.includes(userId)) {
+      // Agar avval bosgan bo‘lsa → o‘chirib tashlaymiz (toggle)
+      movie.likes = movie.likes.filter((id) => id.toString() !== userId);
+    } else {
+      // Agar bosmagan bo‘lsa → qo‘shamiz
+      movie.likes.push(userId);
+    }
+
+    await movie.save();
+    res.json({ likes: movie.likes.length, dislikes: movie.dislikes.length });
+  } catch (err) {
+    console.error("toggleLike error:", err.message);
+    res.status(500).json({ msg: "Server error" });
+  }
+};
+
+// ✅ Dislike toggle
+exports.toggleDislike = async (req, res) => {
+  try {
+    const movie = await Movie.findById(req.params.id);
+    if (!movie) return res.status(404).json({ msg: "Movie not found" });
+
+    const userId = req.user.id;
+
+    if (!movie.likes) movie.likes = [];
+    if (!movie.dislikes) movie.dislikes = [];
+
+    // ❌ Agar avval like bosgan bo‘lsa, o‘chirib tashlaymiz
+    movie.likes = movie.likes.filter((id) => id.toString() !== userId);
+
+    // ✅ Dislike bosganmi?
+    if (movie.dislikes.includes(userId)) {
+      movie.dislikes = movie.dislikes.filter((id) => id.toString() !== userId);
+    } else {
+      movie.dislikes.push(userId);
+    }
+
+    await movie.save();
+    res.json({ likes: movie.likes.length, dislikes: movie.dislikes.length });
+  } catch (err) {
+    console.error("toggleDislike error:", err.message);
+    res.status(500).json({ msg: "Server error" });
+  }
+};
+
+// ✅ Save / Unsave (Watchlist)
+exports.toggleSave = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const movie = await Movie.findById(req.params.id);
+    if (!movie) return res.status(404).json({ msg: "Movie not found" });
+
+    if (movie.saved.includes(userId)) {
+      movie.saved = movie.saved.filter((id) => id.toString() !== userId);
+    } else {
+      movie.saved.push(userId);
+    }
+
+    await movie.save();
+    res.json({ saved: movie.saved.length });
+  } catch (err) {
+    res.status(500).json({ msg: "Server error" });
+  }
+};
