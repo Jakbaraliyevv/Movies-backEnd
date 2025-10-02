@@ -49,12 +49,14 @@ const {
   toggleLike,
   toggleDislike,
   toggleSave,
+  searchMovies,
 } = require("../controllers/movieController");
 
 // ✅ CRUD Routes
 router.get("/", getMovies); // Hamma filmlar
+router.get("/search", searchMovies); // /movies/search?q=keyword
+
 router.get("/premieres", getPremiereMovies); // 🎬 Faqat premyeralar
-router.get("/:id", getMovieById); // Bitta kino
 router.post("/", auth, addMovie); // Kino qo‘shish (faqat login user)
 router.put("/:id", auth, updateMovie); // Kino yangilash
 router.delete("/:id", auth, deleteMovie); // Kino o‘chirish
@@ -63,4 +65,6 @@ router.post("/:id/dislike", auth, toggleDislike);
 router.post("/:id/save", auth, toggleSave);
 // 📌 Views
 router.post("/:id/view", auth, addView);
+router.get("/:id", getMovieById); // Bitta kino
+
 module.exports = router;
