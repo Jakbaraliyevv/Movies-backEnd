@@ -19,6 +19,7 @@ const {
   login,
   logout,
   getUsers,
+  refresh,
 } = require("../controllers/authController");
 // const {} = require("../middleware/authMiddleware");
 const auth = require("../middleware/authMiddleware");
@@ -28,5 +29,6 @@ router.post("/register", register);
 router.post("/login", login);
 router.post("/logout", auth, logout); // ✅ endi ishlaydi
 router.get("/users", auth, getUsers);
+router.post("/refresh", refresh); // ✅ yangi route
 
 module.exports = router;
