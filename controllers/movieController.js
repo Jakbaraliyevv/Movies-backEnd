@@ -1,4 +1,3 @@
-
 const Movie = require("../models/Movie");
 
 // ✅ Hamma filmlar
